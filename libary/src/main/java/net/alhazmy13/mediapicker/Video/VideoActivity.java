@@ -125,7 +125,13 @@ public class VideoActivity extends AppCompatActivity {
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         photoPickerIntent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
         photoPickerIntent.setType("video/*");
-        startActivityForResult(photoPickerIntent, VideoTags.IntentCode.REQUEST_CODE_SELECT_PHOTO);
+        try {
+            startActivityForResult(photoPickerIntent, VideoTags.IntentCode.REQUEST_CODE_SELECT_PHOTO);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, R.string.media_picker_could_not_open_the_gallery, Toast.LENGTH_LONG).show();
+            finish();
+        }
         if (mVideoConfig.debug)
             Log.d(VideoTags.Tags.TAG, "Gallery Start with Single video mode");
     }
@@ -138,7 +144,13 @@ public class VideoActivity extends AppCompatActivity {
         photoPickerIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         photoPickerIntent.setAction(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("video/*");
-        startActivityForResult(Intent.createChooser(photoPickerIntent, "Select Picture"), VideoTags.IntentCode.REQUEST_CODE_SELECT_MULTI_PHOTO);
+        try {
+            startActivityForResult(Intent.createChooser(photoPickerIntent, "Select Picture"), VideoTags.IntentCode.REQUEST_CODE_SELECT_MULTI_PHOTO);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, R.string.media_picker_could_not_open_the_gallery, Toast.LENGTH_LONG).show();
+            finish();
+        }
         if (mVideoConfig.debug)
             Log.d(VideoTags.Tags.TAG, "Gallery Start with Multiple videos mode");
     }
@@ -148,7 +160,13 @@ public class VideoActivity extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         mVideoUri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", destination);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mVideoUri);
-        startActivityForResult(Intent.createChooser(intent, "Select Video"), VideoTags.IntentCode.CAMERA_REQUEST);
+        try {
+            startActivityForResult(Intent.createChooser(intent, "Select Video"), VideoTags.IntentCode.CAMERA_REQUEST);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, R.string.media_picker_could_not_open_the_gallery, Toast.LENGTH_LONG).show();
+            finish();
+        }
         if (mVideoConfig.debug)
             Log.d(VideoTags.Tags.TAG, "Camera Start");
     }

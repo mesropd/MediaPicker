@@ -129,10 +129,16 @@ public class ImageActivity extends AppCompatActivity {
 
     private void startActivityFromGallery() {
         mImgConfig.isImgFromCamera = false;
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         photoPickerIntent.putExtra(Intent.EXTRA_LOCAL_ONLY, !mImgConfig.allowOnlineImages);
         photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, ImageTags.IntentCode.REQUEST_CODE_SELECT_PHOTO);
+        try {
+            startActivityForResult(photoPickerIntent, ImageTags.IntentCode.REQUEST_CODE_SELECT_PHOTO);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, R.string.media_picker_could_not_open_the_gallery, Toast.LENGTH_LONG).show();
+            finish();
+        }
         if (mImgConfig.debug)
             Log.d(ImageTags.Tags.TAG, "Gallery Start with Single Image mode");
     }
@@ -145,7 +151,13 @@ public class ImageActivity extends AppCompatActivity {
         photoPickerIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         photoPickerIntent.setAction(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("image/*");
-        startActivityForResult(Intent.createChooser(photoPickerIntent, "Select Picture"), ImageTags.IntentCode.REQUEST_CODE_SELECT_MULTI_PHOTO);
+        try {
+            startActivityForResult(Intent.createChooser(photoPickerIntent, "Select Picture"), ImageTags.IntentCode.REQUEST_CODE_SELECT_MULTI_PHOTO);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, R.string.media_picker_could_not_open_the_gallery, Toast.LENGTH_LONG).show();
+            finish();
+        }
         if (mImgConfig.debug)
             Log.d(ImageTags.Tags.TAG, "Gallery Start with Multiple Images mode");
     }
@@ -155,7 +167,13 @@ public class ImageActivity extends AppCompatActivity {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         mImageUri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", destination);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), ImageTags.IntentCode.CAMERA_REQUEST);
+        try {
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), ImageTags.IntentCode.CAMERA_REQUEST);
+        }
+        catch (Exception e) {
+            Toast.makeText(this, R.string.media_picker_could_not_open_the_camera, Toast.LENGTH_LONG).show();
+            finish();
+        }
         if (mImgConfig.debug)
             Log.d(ImageTags.Tags.TAG, "Camera Start");
     }
@@ -219,9 +237,13 @@ public class ImageActivity extends AppCompatActivity {
             //intent has multi images
             listOfImgs = ImageProcessing.processMultiImage(this, data);
             if (listOfImgs != null && listOfImgs.size() > 0) {
-                new CompressImageTask(listOfImgs, mImgConfig, ImageActivity.this).execute();
+                finishActivity(listOfImgs);
+                Intent intent = new Intent();
+                intent.setAction("net.alhazmy13.mediapicker.rxjava.image.service");
+                intent.putExtra(ImageTags.Tags.IMAGE_PATH, (Serializable) listOfImgs);
+                sendBroadcast(intent);
             } else {
-                //For 'Select pic from Google Photos - app Crash' fix
+                listOfImgs = new ArrayList<>();
                 String check = data.getClipData().toString();
                 if (check != null && check.contains("com.google.android.apps.photos")) {
                     ClipData clipdata = data.getClipData();
@@ -230,7 +252,11 @@ public class ImageActivity extends AppCompatActivity {
                         String selectedImagePath = FileProcessing.getPath(ImageActivity.this, selectedImage);
                         listOfImgs.add(selectedImagePath);
                     }
-                    new CompressImageTask(listOfImgs, mImgConfig, ImageActivity.this).execute();
+                    finishActivity(listOfImgs);
+                    Intent intent = new Intent();
+                    intent.setAction("net.alhazmy13.mediapicker.rxjava.image.service");
+                    intent.putExtra(ImageTags.Tags.IMAGE_PATH, (Serializable) listOfImgs);
+                    sendBroadcast(intent);
                 }
             }
         }
@@ -239,18 +265,20 @@ public class ImageActivity extends AppCompatActivity {
     public void processOneImage(Intent data) {
         try {
             Uri selectedImage = data.getData();
-            String rawPath = selectedImage.toString();
-            if (rawPath != null) {
-                //For 'Select pic from Google Drive - app Crash' fix
-                if (rawPath.contains("com.google.android.apps.docs.storage")) {
-                    String fileTempPath = getCacheDir().getPath();
-                    new ImageActivity.SaveImageFromGoogleDriveTask(fileTempPath, mImgConfig, selectedImage, ImageActivity.this).execute();
-                } else {
-                    String selectedImagePath = FileProcessing.getPath(this, selectedImage);
-                    new ImageActivity.CompressImageTask(selectedImagePath,
-                            mImgConfig, ImageActivity.this).execute();
-                }
+            String rawPath;
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                rawPath = GetFileFromDevice.getPath(this, selectedImage);
             }
+            else {
+                rawPath = selectedImage.toString();
+            }
+            List<String> destinationPaths = new ArrayList<>();
+            destinationPaths.add(rawPath);
+            finishActivity(destinationPaths);
+            Intent intent = new Intent();
+            intent.setAction("net.alhazmy13.mediapicker.rxjava.image.service");
+            intent.putExtra(ImageTags.Tags.IMAGE_PATH, (Serializable) destinationPaths);
+            sendBroadcast(intent);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

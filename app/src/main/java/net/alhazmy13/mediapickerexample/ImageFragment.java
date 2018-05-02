@@ -53,13 +53,13 @@ public class ImageFragment extends Fragment {
         new ImagePickerHelper(
         new ImagePicker.Builder(getActivity())
                 .mode(ImagePicker.Mode.CAMERA_AND_GALLERY)
-                .allowMultipleImages(true)
+                .allowMultipleImages(false)
                 .compressLevel(ImagePicker.ComperesLevel.MEDIUM)
                 .directory(ImagePicker.Directory.DEFAULT)
                 .extension(ImagePicker.Extension.PNG)
                 .allowOnlineImages(false)
                 .scale(600, 600)
-                .allowMultipleImages(true)
+                .allowMultipleImages(false)
                 .enableDebuggingMode(true))
                 .getObservable()
                 .subscribe(new Subscriber<List<String>>() {

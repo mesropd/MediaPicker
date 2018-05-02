@@ -1,0 +1,12 @@
+<resources>
+    <string name="media_picker_select_from">Выберите из</string>
+    <string name="media_picker_camera">Камера</string>
+    <string name="media_picker_gallery">Галерея</string>
+    <string name="media_picker_ok">Ok</string>
+    <string name="media_picker_cancel">Отмена</string>
+    <string name="media_picker_some_permission_is_denied">Разрешение отклонено</string>
+    <string name="media_picker_you_need_to_grant_access_to">Вы должны предоставить доступ к</string>
+    <string name="media_picker_read_Write_external_storage">Чтение и запись внешнего хранилища</string>
+    <string name="media_picker_could_not_open_the_gallery">Не удалось открыть галерею</string>
+    <string name="media_picker_could_not_open_the_camera">Не удалось открыть камеру</string>
+</resources>
