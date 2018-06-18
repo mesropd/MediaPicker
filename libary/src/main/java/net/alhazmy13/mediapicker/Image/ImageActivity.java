@@ -404,6 +404,9 @@ public class ImageActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             for (String mPath : listOfImgs) {
+                if(mPath == null) {
+                    continue;
+                }
                 File file = new File(mPath);
                 File destinationFile;
                 if (mImgConfig.isImgFromCamera) {
