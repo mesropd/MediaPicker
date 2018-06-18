@@ -369,6 +369,9 @@ public class VideoActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             for (String mPath : listOfImgs) {
+                if(mPath == null) {
+                    continue;
+                }
                 File file = new File(mPath);
                 File destinationFile;
                 if (mVideoConfig.isImgFromCamera) {
@@ -378,12 +381,6 @@ public class VideoActivity extends AppCompatActivity {
                     FileProcessing.copyDirectory(file, destinationFile);
                 }
                 destinationPaths.add(destinationFile.getAbsolutePath());
-//                try {
-//                    Utility.compressAndRotateIfNeeded(file, destinationFile, mVideoConfig.compressLevel.getValue(), mVideoConfig.reqWidth, mVideoConfig.reqHeight);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
             }
 
             return null;
@@ -396,7 +393,6 @@ public class VideoActivity extends AppCompatActivity {
             VideoActivity context = mContext.get();
             if (context != null) {
                 context.finishActivity(destinationPaths);
-
             }
         }
     }
